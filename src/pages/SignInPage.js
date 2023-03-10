@@ -1,21 +1,21 @@
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/button";
+import { Field } from "../components/field";
+import { IconEyeClose, IconEyeOpen } from "../components/icon";
 import { Input } from "../components/input";
 import { Label } from "../components/label";
-import { useForm } from "react-hook-form";
-import { IconEyeClose, IconEyeOpen } from "../components/icon";
-import { Field } from "../components/field";
-import { Button } from "../components/button";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { toast } from "react-toastify";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, db } from "../firebase/config";
-import { useNavigate } from "react-router-dom";
-import { addDoc, collection } from "firebase/firestore";
+import { useAuth } from "../contexts/auth-context";
 import AuthenticationPage from "./AuthenticationPage";
+import { toast } from "react-toastify";
+import { async } from "@firebase/util";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/config";
 
 const schema = yup.object({
-  fullname: yup.string().required("Please enter your fullname"),
   email: yup
     .string()
     .email("Please enter valid email address")
@@ -32,8 +32,10 @@ const schema = yup.object({
     )
     .required("Please enter your password"),
 });
-const SignUpPage = () => {
+
+const SignInPage = () => {
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
   const {
     control,
     handleSubmit,
@@ -44,22 +46,18 @@ const SignUpPage = () => {
     mode: "onSubmit",
     resolver: yupResolver(schema),
   });
-  const handleSignUp = async (values) => {
+  const [togglePassword, setTogglePassword] = useState(false);
+  const handleSignIn = async (values) => {
+    console.log(values);
     if (!isValid) return;
-    await createUserWithEmailAndPassword(auth, values.email, values.password);
-    await updateProfile(auth.currentUser, {
-      displayName: values.fullname,
-    });
-    const colRef = collection(db, "users");
-    await addDoc(colRef, {
-      fullname: values.fullname,
-      email: values.email,
-      password: values.password,
-    });
-    toast.success("Bạn đã tạo tài khoản thành công!");
+    await signInWithEmailAndPassword(auth, values.email, values.password);
     navigate("/");
   };
-  const [togglePassword, setTogglePassword] = useState(false);
+  // console.log(userInfo);
+  // useEffect(() => {
+  //   if (!userInfo.email) navigate("/");
+  //   else navigate("/sign-in");
+  // }, []);
   useEffect(() => {
     const arrayError = Object.values(errors);
     if (arrayError.length > 0) {
@@ -67,24 +65,15 @@ const SignUpPage = () => {
     }
   }, [errors]);
   useEffect(() => {
-    document.title = "Sign Up";
+    document.title = "Sign In";
   });
   return (
     <AuthenticationPage>
       <form
         className="form"
-        onSubmit={handleSubmit(handleSignUp)}
+        onSubmit={handleSubmit(handleSignIn)}
         autoComplete="off"
       >
-        <Field>
-          <Label htmlFor="fullname">Fullname</Label>
-          <Input
-            type="text"
-            name="fullname"
-            placeholder="Please enter you fullname"
-            control={control}
-          ></Input>
-        </Field>
         <Field>
           <Label htmlFor="email">Email address</Label>
           <Input
@@ -126,11 +115,11 @@ const SignUpPage = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Sign Up
+          Sign In
         </Button>
       </form>
     </AuthenticationPage>
   );
 };
 
-export default SignUpPage;
+export default SignInPage;
