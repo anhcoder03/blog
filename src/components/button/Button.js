@@ -9,10 +9,10 @@ const ButtonStyles = styled.button`
   line-height: 1;
   height: ${(props) => props.height || "66px"};
   color: #fff;
+  width: ${(props) => props.width};
   border-radius: 8px;
   font-size: 18px;
   font-weight: 600;
-  width: 100%;
   display: block;
   background-image: linear-gradient(
     to right bottom,

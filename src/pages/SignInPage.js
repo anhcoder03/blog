@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "../components/button";
 import { Field } from "../components/field";
 import { IconEyeClose, IconEyeOpen } from "../components/icon";
@@ -36,6 +36,11 @@ const schema = yup.object({
 const SignInPage = () => {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  useEffect(() => {
+    document.title = "Login Page";
+    if (userInfo?.email) navigate("/");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo]);
   const {
     control,
     handleSubmit,
@@ -48,25 +53,23 @@ const SignInPage = () => {
   });
   const [togglePassword, setTogglePassword] = useState(false);
   const handleSignIn = async (values) => {
-    console.log(values);
     if (!isValid) return;
-    await signInWithEmailAndPassword(auth, values.email, values.password);
-    navigate("/");
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast.success("Bạn đã đăng nhập thành công");
+      navigate("/");
+    } catch (error) {
+      if (error.message.includes("wrong-password"))
+        toast.error("Email hoặc mật khẩu không chính xác");
+    }
   };
-  // console.log(userInfo);
-  // useEffect(() => {
-  //   if (!userInfo.email) navigate("/");
-  //   else navigate("/sign-in");
-  // }, []);
+
   useEffect(() => {
     const arrayError = Object.values(errors);
     if (arrayError.length > 0) {
       toast.error(arrayError[0]?.message);
     }
   }, [errors]);
-  useEffect(() => {
-    document.title = "Sign In";
-  });
   return (
     <AuthenticationPage>
       <form
@@ -106,12 +109,17 @@ const SignInPage = () => {
             )}
           </Input>
         </Field>
+        <div className="have-account">
+          You have not had an account?
+          <NavLink to={"/sign-up"}>Register an account</NavLink>
+        </div>
         <Button
           type="submit"
           style={{
             maxWidth: 300,
             margin: "0 auto",
           }}
+          width={"100%"}
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
