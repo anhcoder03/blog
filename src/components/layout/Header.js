@@ -1,6 +1,10 @@
+import { signOut } from "firebase/auth";
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { toast } from "react-toastify";
 import styled from "styled-components";
+import { useAuth } from "../../contexts/auth-context";
+import { auth } from "../../firebase/config";
 import { Button } from "../button";
 
 const HeaderStyles = styled.header`
@@ -67,6 +71,12 @@ const menuLinks = [
   },
 ];
 const Header = () => {
+  const { userInfo } = useAuth();
+  console.log(userInfo);
+  const handleSignOut = () => {
+    toast.success("Đăng xuất thành công!");
+    signOut(auth);
+  };
   return (
     <HeaderStyles>
       <div className="container">
@@ -120,9 +130,25 @@ const Header = () => {
               </svg>
             </span>
           </div>
-          <Button className="header-button" height="56px">
-            Sign Up
-          </Button>
+          {!userInfo?.email ? (
+            <Button
+              type="button"
+              to={"/sign-up"}
+              className="header-button"
+              height="56px"
+            >
+              Sign Up
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="header-button"
+              height="56px"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
+          )}
         </div>
       </div>
     </HeaderStyles>
