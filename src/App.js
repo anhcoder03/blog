@@ -5,6 +5,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import PostDetailsPage from "./pages/PostDetailPage";
+import DashboardLayout from "./module/dashboard/DashboardLayout";
+import DashboardPage from "./pages/DashboardPage";
+import PostManage from "./module/post/PostManage";
 
 function App() {
   return (
@@ -19,6 +22,16 @@ function App() {
             path="/:slug"
             element={<PostDetailsPage></PostDetailsPage>}
           ></Route>
+          <Route element={<DashboardLayout></DashboardLayout>}>
+            <Route
+              path="/dashboard"
+              element={<DashboardPage></DashboardPage>}
+            ></Route>
+            <Route
+              path="/manage/post"
+              element={<PostManage></PostManage>}
+            ></Route>
+          </Route>
         </Routes>
       </AuthProvider>
     </div>
