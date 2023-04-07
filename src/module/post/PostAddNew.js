@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { Field } from "../../components/field";
@@ -9,10 +9,19 @@ import { Dropdown } from "../../components/dropdown";
 import { Button } from "../../components/button";
 import slugify from "slugify";
 import { postStatus } from "../../utils/constants";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import ImageUpload from "../../components/image/ImageUpload";
+
 const PostAddNewStyles = styled.div``;
 
 const PostAddNew = () => {
-  const { control, watch, setValue, handleSubmit } = useForm({
+  const { control, watch, setValue, handleSubmit, getValues } = useForm({
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -28,7 +37,64 @@ const PostAddNew = () => {
     cloneValues.slug = slugify(values.slug || values.title);
     cloneValues.status = Number(values.status);
     console.log(cloneValues);
+    // handleUploadImage(cloneValues.image);
   };
+  const [progress, setProgress] = useState(0);
+  const [image, setImage] = useState("");
+  const handleUploadImage = (file) => {
+    const storage = getStorage();
+    const storageRef = ref(storage, "images/" + file.name);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progressPercent =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setProgress(progressPercent);
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+          default:
+            console.log("Nothing at all");
+        }
+      },
+      (error) => {
+        console.log("Error");
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          setImage(downloadURL);
+        });
+      }
+    );
+  };
+  const onSelectImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setValue("image_name", file.name);
+    handleUploadImage(file);
+  };
+
+  const handleDeleteImage = () => {
+    const storage = getStorage();
+    const imageRef = ref(storage, "images/" + getValues("image_name"));
+
+    deleteObject(imageRef)
+      .then(() => {
+        console.log("Remove image success");
+        setImage("");
+        setProgress(0);
+      })
+      .catch((error) => {
+        console.log("Can not delete image");
+      });
+  };
+
   return (
     <PostAddNewStyles>
       <h1 className="dashboard-heading">Add new post</h1>
@@ -53,6 +119,16 @@ const PostAddNew = () => {
           </Field>
         </div>
         <div className="grid grid-cols-2 gap-x-10 mb-10">
+          <Field>
+            <Label>Image</Label>
+            <ImageUpload
+              onChange={onSelectImage}
+              handleDeleteImage={handleDeleteImage}
+              progress={progress}
+              image={image}
+              className="h-[250px]"
+            ></ImageUpload>
+          </Field>
           <Field>
             <Label>Status</Label>
             <div className="flex items-center gap-x-5">
