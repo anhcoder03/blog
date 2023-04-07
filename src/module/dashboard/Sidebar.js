@@ -140,7 +140,7 @@ const Sidebar = () => {
   return (
     <SidebarStyles className="sidebar">
       <div className="sidebar-logo">
-        <img srcSet="/logo.png 2x" alt="" />
+        <img srcSet="/blog-logo.png 2x" alt="" />
         <span>Monkey Blogging</span>
       </div>
       {sidebarLinks.map((link) => (

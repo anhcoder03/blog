@@ -22,6 +22,7 @@ const HomeBannerStyles = styled.div`
     &-heading {
       font-size: 36px;
       margin-bottom: 20px;
+      font-weight: bold;
     }
     &-desc {
       line-height: 1.75;
@@ -65,7 +66,7 @@ const HomeBanner = () => {
               Quaerat voluptates possimus dolorem officiis pariatur, repellat,
               cupiditate porro, quidem molestiae impedit laudantium neque quo!
             </p>
-            <Button to="/sign-up" kind="secondary">
+            <Button to="/sign-up" kind="secondary" className="banner-button">
               Get started
             </Button>
           </div>
