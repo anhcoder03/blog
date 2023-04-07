@@ -1,11 +1,22 @@
-import { signOut } from "firebase/auth";
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { toast } from "react-toastify";
 import styled from "styled-components";
 import { useAuth } from "../../contexts/auth-context";
-import { auth } from "../../firebase/config";
 import { Button } from "../button";
+const menuLinks = [
+  {
+    url: "/",
+    title: "Home",
+  },
+  {
+    url: "/blog",
+    title: "Blog",
+  },
+  {
+    url: "/contact",
+    title: "Contact",
+  },
+];
 
 const HeaderStyles = styled.header`
   padding: 20px 0;
@@ -23,23 +34,19 @@ const HeaderStyles = styled.header`
     gap: 20px;
     margin-left: 40px;
     list-style: none;
-  }
-  .menu-link {
-    color: #000;
-    font-size: 18px;
     font-weight: 500;
   }
-
   .search {
-    display: flex;
-    align-items: center;
+    margin-left: auto;
     padding: 15px 25px;
-    border: 1px solid #eee;
-    border-radius: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     width: 100%;
     max-width: 320px;
-    margin-left: auto;
+    display: flex;
+    align-items: center;
     position: relative;
+    margin-right: 20px;
   }
   .search-input {
     flex: 1;
@@ -52,36 +59,35 @@ const HeaderStyles = styled.header`
     transform: translateY(-50%);
     right: 25px;
   }
-  .header-button {
-    margin-left: 20px;
+  @media screen and (max-width: 1023.98px) {
+    .logo {
+      max-width: 30px;
+    }
+    .menu,
+    .search,
+    .header-button,
+    .header-auth {
+      display: none;
+    }
   }
 `;
-const menuLinks = [
-  {
-    url: "/",
-    title: "Home",
-  },
-  {
-    url: "/blog",
-    title: "Blog",
-  },
-  {
-    url: "/contact",
-    title: "Contact",
-  },
-];
+function getLastName(name) {
+  if (!name) return "User";
+  const length = name.split(" ").length;
+  return name.split(" ")[length - 1];
+}
 const Header = () => {
   const { userInfo } = useAuth();
-  const handleSignOut = () => {
-    toast.success("Đăng xuất thành công!");
-    signOut(auth);
-  };
   return (
     <HeaderStyles>
       <div className="container">
         <div className="header-main">
-          <NavLink href="/">
-            <img srcSet="blog-logo.png 2x" alt="" className="logo" />
+          <NavLink to="/">
+            <img
+              srcSet="/blog-logo.png 2x"
+              alt="monkey-blogging"
+              className="logo"
+            />
           </NavLink>
           <ul className="menu">
             {menuLinks.map((item) => (
@@ -129,25 +135,22 @@ const Header = () => {
               </svg>
             </span>
           </div>
-          {!userInfo?.email ? (
+          {!userInfo ? (
             <Button
-              kind="primary"
               type="button"
-              to={"/sign-up"}
-              className="header-button"
               height="56px"
+              className="header-button"
+              to="/sign-up"
             >
               Sign Up
             </Button>
           ) : (
-            <Button
-              type="button"
-              className="header-button"
-              height="56px"
-              onClick={handleSignOut}
-            >
-              Sign Out
-            </Button>
+            <div className="header-auth">
+              <span>Welcome back, </span>
+              <strong className="text-primary">
+                {getLastName(userInfo?.displayName)}
+              </strong>
+            </div>
           )}
         </div>
       </div>
