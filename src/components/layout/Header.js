@@ -72,7 +72,6 @@ const menuLinks = [
 ];
 const Header = () => {
   const { userInfo } = useAuth();
-  console.log(userInfo);
   const handleSignOut = () => {
     toast.success("Đăng xuất thành công!");
     signOut(auth);
@@ -132,6 +131,7 @@ const Header = () => {
           </div>
           {!userInfo?.email ? (
             <Button
+              kind="primary"
               type="button"
               to={"/sign-up"}
               className="header-button"
