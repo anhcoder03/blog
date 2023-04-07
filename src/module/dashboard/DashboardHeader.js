@@ -23,7 +23,7 @@ const DashboardHeaderStyles = styled.div`
 const DashboardHeader = () => {
   return (
     <DashboardHeaderStyles>
-      <Button to="/dashboard" className="header-button" height="52px">
+      <Button to="/manage/add-post" className="header-button" height="52px">
         Write new post
       </Button>
       <div className="header-avatar">

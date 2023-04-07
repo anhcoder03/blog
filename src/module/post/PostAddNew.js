@@ -1,17 +1,7 @@
+import slugify from "slugify";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
-import { Field } from "../../components/field";
-import { Label } from "../../components/label";
-import { Input } from "../../components/input";
-import { Radio } from "../../components/checkbox";
-import { Dropdown } from "../../components/dropdown";
-import { Button } from "../../components/button";
-import slugify from "slugify";
-import { postStatus } from "../../utils/constants";
-import ImageUpload from "../../components/image/ImageUpload";
-import useFirebaseImage from "../../hooks/useFirebaseImage";
-import Toggle from "../../components/toggle/Toggle";
+import { toast } from "react-toastify";
 import {
   addDoc,
   collection,
@@ -20,11 +10,20 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import { db } from "../../firebase/config";
 import { useAuth } from "../../contexts/auth-context";
-import { toast } from "react-toastify";
-
-const PostAddNewStyles = styled.div``;
+import useFirebaseImage from "../../hooks/useFirebaseImage";
+import { db } from "../../firebase/config";
+import { Field } from "../../components/field";
+import { Label } from "../../components/label";
+import { Input } from "../../components/input";
+import ImageUpload from "../../components/image/ImageUpload";
+import { Dropdown } from "../../components/dropdown";
+import Toggle from "../../components/toggle/Toggle";
+import FieldCheckboxes from "../../drafts/FieldCheckboxes";
+import { Radio } from "../../components/checkbox";
+import { postStatus } from "../../utils/constants";
+import { Button } from "../../components/button";
+import DashboardHeading from "../dashboard/DashboardHeading";
 
 const PostAddNew = () => {
   const { userInfo } = useAuth();
@@ -39,23 +38,21 @@ const PostAddNew = () => {
       image: "",
     },
   });
+  const watchStatus = watch("status");
+  const watchHot = watch("hot");
   const {
-    progress,
-    setImage,
-    setProgress,
     image,
+    handleResetUpload,
+    progress,
     handleSelectImage,
     handleDeleteImage,
   } = useFirebaseImage(setValue, getValues);
   const [categories, setCategories] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
-  const watchStatus = watch("status");
-  const watchHot = watch("hot");
-  // const watchCategory = watch("category");
-  const addPostHandle = async (values) => {
+  const addPostHandler = async (values) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const cloneValues = { ...values };
       cloneValues.slug = slugify(values.slug || values.title, { lower: true });
       cloneValues.status = Number(values.status);
@@ -75,11 +72,11 @@ const PostAddNew = () => {
         hot: false,
         image: "",
       });
-      setSelectCategory(null);
-      setImage(null);
-      setProgress(0);
-    } catch (err) {
-      console.log(err);
+      handleResetUpload();
+      setSelectCategory({});
+    } catch (error) {
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };
@@ -100,21 +97,28 @@ const PostAddNew = () => {
     }
     getData();
   }, []);
+
+  useEffect(() => {
+    document.title = "Monkey Blogging - Add new post";
+  }, []);
+
   const handleClickOption = (item) => {
     setValue("categoryId", item.id);
-    setSelectCategory(item.name);
+    setSelectCategory(item);
   };
+
   return (
-    <PostAddNewStyles>
-      <h1 className="dashboard-heading">Add new post</h1>
-      <form onSubmit={handleSubmit(addPostHandle)}>
-        <div className="grid grid-cols-2 gap-x-10 mb-10">
+    <>
+      <DashboardHeading title="Add post" desc="Add new post"></DashboardHeading>
+      <form onSubmit={handleSubmit(addPostHandler)}>
+        <div className="form-layout">
           <Field>
             <Label>Title</Label>
             <Input
               control={control}
               placeholder="Enter your title"
               name="title"
+              required
             ></Input>
           </Field>
           <Field>
@@ -126,23 +130,21 @@ const PostAddNew = () => {
             ></Input>
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-x-10 mb-10">
+        <div className="form-layout">
           <Field>
             <Label>Image</Label>
             <ImageUpload
               onChange={handleSelectImage}
               handleDeleteImage={handleDeleteImage}
+              className="h-[250px]"
               progress={progress}
               image={image}
-              className="h-[250px]"
             ></ImageUpload>
           </Field>
           <Field>
             <Label>Category</Label>
             <Dropdown>
-              <Dropdown.Select
-                placeholder={`${selectCategory || "Select category"}`}
-              ></Dropdown.Select>
+              <Dropdown.Select placeholder="Select the category"></Dropdown.Select>
               <Dropdown.List>
                 {categories.length > 0 &&
                   categories.map((item) => (
@@ -155,18 +157,14 @@ const PostAddNew = () => {
                   ))}
               </Dropdown.List>
             </Dropdown>
-            {selectCategory && (
-              <span className="inline-block p-3 rounded-lg bg-green-50 text-green-600 text-sm font-medium">
-                {selectCategory}
+            {selectCategory?.name && (
+              <span className="inline-block p-3 rounded-lg bg-green-50 text-sm text-green-600 font-medium">
+                {selectCategory?.name}
               </span>
             )}
           </Field>
-          {/* <Field>
-            <Label>Author</Label>
-            <Input control={control} placeholder="Find the author"></Input>
-          </Field> */}
         </div>
-        <div className="grid grid-cols-2 gap-x-10 mb-10">
+        <div className="form-layout">
           <Field>
             <Label>Feature post</Label>
             <Toggle
@@ -176,7 +174,7 @@ const PostAddNew = () => {
           </Field>
           <Field>
             <Label>Status</Label>
-            <div className="flex items-center gap-x-5">
+            <FieldCheckboxes>
               <Radio
                 name="status"
                 control={control}
@@ -201,19 +199,19 @@ const PostAddNew = () => {
               >
                 Reject
               </Radio>
-            </div>
+            </FieldCheckboxes>
           </Field>
         </div>
         <Button
           type="submit"
-          className="mx-auto w-[2g0px]"
+          className="mx-auto w-[250px]"
           isLoading={loading}
           disabled={loading}
         >
           Add new post
         </Button>
       </form>
-    </PostAddNewStyles>
+    </>
   );
 };
 

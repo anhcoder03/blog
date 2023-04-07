@@ -1,12 +1,23 @@
 import React from "react";
 import { Table } from "../../components/table";
 import { Pagination } from "../../components/pagination";
+import DashboardHeading from "../dashboard/DashboardHeading";
+import { Dropdown } from "../../components/dropdown";
+import { Button } from "../../components/button";
 
 const PostManage = () => {
   return (
     <div>
-      <h1 className="dashboard-heading">Manage post</h1>
-      <div className="mb-10 flex justify-end">
+      <DashboardHeading
+        title="All posts"
+        desc="Manage all posts"
+      ></DashboardHeading>
+      <div className="mb-10 flex justify-end gap-5">
+        <div className="w-full max-w-[200px]">
+          <Dropdown>
+            <Dropdown.Select placeholder="Category"></Dropdown.Select>
+          </Dropdown>
+        </div>
         <div className="w-full max-w-[300px]">
           <input
             type="text"
@@ -111,8 +122,11 @@ const PostManage = () => {
           </tr>
         </tbody>
       </Table>
-      <div className="mt-10">
-        <Pagination></Pagination>
+      <div className="mt-10 text-center">
+        {/* <Pagination></Pagination> */}
+        <Button kind="ghost" className="mx-auto w-[200px]">
+          See more+
+        </Button>
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
 import React from "react";
 import { useDropdown } from "./dropdown-context";
 
-const Select = ({ placeholder = "" }) => {
+const Select = ({ placeholder = "", className = "" }) => {
   const { toggle, show } = useDropdown();
   return (
     <div
-      className="flex items-center justify-between p-5 bg-[#E7ECF3] rounded cursor-pointer font-medium"
+      className={`flex items-center justify-between py-4 px-5 bg-white border border-grayf1 rounded-lg cursor-pointer text-sm text-[#B2B3BD] ${className}`}
       onClick={toggle}
     >
       <span>{placeholder}</span>
