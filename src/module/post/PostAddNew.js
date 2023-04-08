@@ -63,7 +63,6 @@ const PostAddNew = () => {
         userId: userInfo.uid,
         createdAt: serverTimestamp(),
       });
-      toast.success("Create new post successfully!");
       reset({
         title: "",
         slug: "",
@@ -74,6 +73,7 @@ const PostAddNew = () => {
       });
       handleResetUpload();
       setSelectCategory({});
+      toast.success("Create new post successfully!");
     } catch (error) {
       setLoading(false);
     } finally {
