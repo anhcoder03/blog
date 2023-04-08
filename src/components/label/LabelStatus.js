@@ -26,6 +26,12 @@ const LabelStatus = ({ children, type = "default" }) => {
     case "danger":
       styleClassName = "text-red-500 bg-red-100";
       break;
+    case "admin":
+      styleClassName = "bg-blue-100 text-blue-500";
+      break;
+    case "user":
+      styleClassName = "bg-pink-100 text-pink-500";
+      break;
 
     default:
       break;

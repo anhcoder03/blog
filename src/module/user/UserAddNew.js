@@ -18,7 +18,7 @@ const UserAddNew = () => {
         title="New user"
         desc="Add new user to system"
       ></DashboardHeading>
-      <form>
+      <form className="mt-10">
         <div className="form-layout">
           <Field>
             <Label>Fullname</Label>

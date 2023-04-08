@@ -16,7 +16,7 @@ const DashboardStyles = styled.div`
     }
     &-main {
       display: grid;
-      grid-template-columns: 300px minmax(0, 1fr);
+      grid-template-columns: 250px minmax(0, 1fr);
       padding: 40px 20px;
       gap: 0 40px;
       align-items: start;
