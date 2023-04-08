@@ -9,7 +9,6 @@ import { db } from "../../firebase/config";
 import formatDate from "../../utils/formatDate";
 import { userRole, userStatus } from "../../utils/constants";
 import Swal from "sweetalert2";
-import { deleteUser } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 const UserTable = () => {

@@ -1,8 +1,5 @@
 import React from "react";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
-import { Table } from "../../components/table";
-import { useState } from "react";
 import UserTable from "./UserTable";
 import { Button } from "../../components/button";
 
