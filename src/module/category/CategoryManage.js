@@ -5,16 +5,36 @@ import LabelStatus from "../../components/label/LabelStatus";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Button } from "../../components/button";
 import { useEffect } from "react";
-import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  onSnapshot,
+  query,
+  startAfter,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase/config";
-import { categoryStatus } from "../../utils/constants";
+import { PER_PAGE, categoryStatus } from "../../utils/constants";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 
 const CategoryManage = () => {
   const [categoryList, setCategoryList] = useState([]);
-  useEffect(() => {
-    const colRef = collection(db, "categories");
-    onSnapshot(colRef, (snapshot) => {
+  const navigate = useNavigate();
+  const [filter, setFilter] = useState("");
+  const [lastDoc, setLastDoc] = useState();
+  const [total, setTotal] = useState(0);
+  const handleLoadmoreCategory = async () => {
+    const nextRef = query(
+      collection(db, "categories"),
+      startAfter(lastDoc),
+      limit(1)
+    );
+    onSnapshot(nextRef, (snapshot) => {
       let results = [];
       snapshot.forEach((doc) => {
         results.push({
@@ -22,9 +42,45 @@ const CategoryManage = () => {
           ...doc.data(),
         });
       });
-      setCategoryList(results);
+      setCategoryList([...categoryList, ...results]);
     });
-  }, []);
+    const documentSnapshots = await getDocs(nextRef);
+    const lastVisible =
+      documentSnapshots.docs[documentSnapshots.docs.length - 1];
+    setLastDoc(lastVisible);
+  };
+  useEffect(() => {
+    async function fetchData() {
+      const colRef = collection(db, "categories");
+      const newRef = filter
+        ? query(
+            colRef,
+            where("name", ">=", filter),
+            where("name", "<=", filter + "utf8")
+          )
+        : query(colRef, limit(PER_PAGE));
+      const documentSnapshots = await getDocs(newRef);
+      const lastVisible =
+        documentSnapshots.docs[documentSnapshots.docs.length - 1];
+
+      onSnapshot(colRef, (snapshot) => {
+        setTotal(snapshot.size);
+      });
+
+      onSnapshot(newRef, (snapshot) => {
+        let results = [];
+        snapshot.forEach((doc) => {
+          results.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        setCategoryList(results);
+      });
+      setLastDoc(lastVisible);
+    }
+    fetchData();
+  }, [filter]);
   const handleDeleteCategory = async (docId) => {
     const colRef = doc(db, "categories", docId);
     Swal.fire({
@@ -42,6 +98,9 @@ const CategoryManage = () => {
       }
     });
   };
+  const handleInputFilter = debounce((e) => {
+    setFilter(e.target.value);
+  }, 500);
   return (
     <div>
       <DashboardHeading title="Categories" desc="Manage your category">
@@ -49,6 +108,14 @@ const CategoryManage = () => {
           Create category
         </Button>
       </DashboardHeading>
+      <div className="mb-10 flex justify-end">
+        <input
+          type="text"
+          placeholder="Search category..."
+          className="py-4 px-5 border border-gray-300 rounded-lg"
+          onChange={handleInputFilter}
+        />
+      </div>
       <Table>
         <thead>
           <tr>
@@ -79,7 +146,11 @@ const CategoryManage = () => {
                 <td>
                   <div className="flex gap-5 text-gray-400">
                     <ActionView></ActionView>
-                    <ActionEdit></ActionEdit>
+                    <ActionEdit
+                      onClick={() =>
+                        navigate(`/manage/update-category?id=${item.id}`)
+                      }
+                    ></ActionEdit>
                     <ActionDelete
                       onClick={() => handleDeleteCategory(item.id)}
                     ></ActionDelete>
@@ -89,6 +160,17 @@ const CategoryManage = () => {
             ))}
         </tbody>
       </Table>
+      {total > categoryList.length && (
+        <div className="mt-10">
+          <Button
+            type={"button"}
+            className="mx-auto"
+            onClick={handleLoadmoreCategory}
+          >
+            Load more
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
