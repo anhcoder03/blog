@@ -1,7 +1,6 @@
 import React from "react";
 import { Table } from "../../components/table";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import { Dropdown } from "../../components/dropdown";
 import { Button } from "../../components/button";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -114,11 +113,7 @@ const PostManage = () => {
         desc="Manage all posts"
       ></DashboardHeading>
       <div className="mb-10 flex justify-end gap-5">
-        <div className="w-full max-w-[200px]">
-          <Dropdown>
-            <Dropdown.Select placeholder="Category"></Dropdown.Select>
-          </Dropdown>
-        </div>
+        <div className="w-full max-w-[200px]"></div>
         <div className="w-full max-w-[300px]">
           <input
             type="text"
@@ -175,7 +170,7 @@ const PostManage = () => {
                     <LabelStatus type="warning">Pending</LabelStatus>
                   )}
                   {item.status === postStatus.REJECTED && (
-                    <LabelStatus type="danger">Ban</LabelStatus>
+                    <LabelStatus type="danger">Rejected</LabelStatus>
                   )}
                 </td>
                 <td>
@@ -185,7 +180,7 @@ const PostManage = () => {
                     ></ActionView>
                     <ActionEdit
                       onClick={() =>
-                        navigate(`/manage/update-post?id=${item.slug}`)
+                        navigate(`/manage/update-post?id=${item.id}`)
                       }
                     ></ActionEdit>
                     <ActionDelete
