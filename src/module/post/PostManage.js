@@ -1,11 +1,112 @@
 import React from "react";
 import { Table } from "../../components/table";
-import { Pagination } from "../../components/pagination";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Dropdown } from "../../components/dropdown";
 import { Button } from "../../components/button";
+import { useState } from "react";
+import { useEffect } from "react";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  onSnapshot,
+  query,
+  startAfter,
+  where,
+} from "firebase/firestore";
+import { db } from "../../firebase/config";
+import formatDate from "../../utils/formatDate";
+import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
+import { PER_PAGE, postStatus } from "../../utils/constants";
+import LabelStatus from "../../components/label/LabelStatus";
+import { debounce } from "lodash";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const PostManage = () => {
+  const [postList, setPostList] = useState([]);
+  const [filter, setFilter] = useState("");
+  const navigate = useNavigate();
+
+  const [lastDoc, setLastDoc] = useState();
+  const [total, setTotal] = useState(0);
+  const handleLoadmoreCategory = async () => {
+    const nextRef = query(
+      collection(db, "posts"),
+      startAfter(lastDoc),
+      limit(1)
+    );
+    onSnapshot(nextRef, (snapshot) => {
+      let results = [];
+      snapshot.forEach((doc) => {
+        results.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      setPostList([...postList, ...results]);
+    });
+    const documentSnapshots = await getDocs(nextRef);
+    const lastVisible =
+      documentSnapshots.docs[documentSnapshots.docs.length - 1];
+    setLastDoc(lastVisible);
+  };
+  useEffect(() => {
+    async function fetchData() {
+      const colRef = collection(db, "posts");
+      const newRef = filter
+        ? query(
+            colRef,
+            where("title", ">=", filter),
+            where("title", "<=", filter + "utf8")
+          )
+        : query(colRef, limit(PER_PAGE));
+      const documentSnapshots = await getDocs(newRef);
+      const lastVisible =
+        documentSnapshots.docs[documentSnapshots.docs.length - 1];
+
+      onSnapshot(colRef, (snapshot) => {
+        setTotal(snapshot.size);
+      });
+
+      onSnapshot(newRef, (snapshot) => {
+        let results = [];
+        snapshot.forEach((doc) => {
+          results.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        setPostList(results);
+        console.log(results);
+      });
+      setLastDoc(lastVisible);
+    }
+    fetchData();
+  }, [filter]);
+
+  const handleInputFilter = debounce((e) => {
+    setFilter(e.target.value);
+  }, 500);
+  const handleDeletePost = async (docId) => {
+    const colRef = doc(db, "posts", docId);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteDoc(colRef);
+        Swal.fire("Deleted!", "Your file has been deleted.", "success");
+      }
+    });
+  };
   return (
     <div>
       <DashboardHeading
@@ -23,111 +124,91 @@ const PostManage = () => {
             type="text"
             className="w-full p-4 rounded-lg border border-solid border-gray-300"
             placeholder="Search post..."
+            onChange={handleInputFilter}
           />
         </div>
       </div>
       <Table>
         <thead>
           <tr>
-            <th></th>
             <th>Id</th>
             <th>Post</th>
             <th>Category</th>
             <th>Author</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td></td>
-            <td>01</td>
-            <td>
-              <div className="flex items-center gap-x-3">
-                <img
-                  src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1548&q=80"
-                  alt=""
-                  className="w-[66px] h-[55px] rounded object-cover"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold">One Special 4K Camera</h3>
-                  <time className="text-sm text-gray-500">
-                    Date: 25 Oct 2021
-                  </time>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span className="text-gray-500">Camera Gear</span>
-            </td>
-            <td>
-              <span className="text-gray-500">Evondev</span>
-            </td>
-            <td>
-              <div className="flex items-center gap-x-3 text-gray-500">
-                <span className="flex items-center justify-center w-10 h-10 border border-gray-200 rounded cursor-pointer">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          {postList.length > 0 &&
+            postList.map((item, index) => (
+              <tr key={item.id}>
+                <td>{index + 1}</td>
+                <td>
+                  <div className="flex items-center gap-x-3">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-[66px] h-[55px] rounded object-cover"
                     />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </span>
-                <span className="flex items-center justify-center w-10 h-10 border border-gray-200 rounded cursor-pointer">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                </span>
-                <span className="flex items-center justify-center w-10 h-10 border border-gray-200 rounded cursor-pointer">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </span>
-              </div>
-            </td>
-          </tr>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm max-w-[300px]">
+                        {item.title}
+                      </h3>
+                      <time className="text-sm text-gray-500">
+                        Date: {formatDate(item.createdAt.seconds)}
+                      </time>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span className="text-gray-500">{item.category.name}</span>
+                </td>
+                <td>
+                  <span className="text-gray-500">{item.user.fullname}</span>
+                </td>
+                <td>
+                  {item.status === postStatus.APPROVED && (
+                    <LabelStatus type="success">Approved</LabelStatus>
+                  )}
+                  {item.status === postStatus.PENDING && (
+                    <LabelStatus type="warning">Pending</LabelStatus>
+                  )}
+                  {item.status === postStatus.REJECTED && (
+                    <LabelStatus type="danger">Ban</LabelStatus>
+                  )}
+                </td>
+                <td>
+                  <div className="flex items-center gap-x-3 text-gray-500">
+                    <ActionView
+                      onClick={() => navigate(`/${item.slug}`)}
+                    ></ActionView>
+                    <ActionEdit
+                      onClick={() =>
+                        navigate(`/manage/update-post?id=${item.slug}`)
+                      }
+                    ></ActionEdit>
+                    <ActionDelete
+                      onClick={() => handleDeletePost(item.id)}
+                    ></ActionDelete>
+                  </div>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </Table>
-      <div className="mt-10 text-center">
-        {/* <Pagination></Pagination> */}
-        <Button kind="ghost" className="mx-auto w-[200px]">
-          See more+
-        </Button>
-      </div>
+      {total > postList.length && (
+        <div className="mt-10 text-center">
+          <Button
+            kind="ghost"
+            type={"button"}
+            className="mx-auto w-[200px]"
+            onClick={handleLoadmoreCategory}
+          >
+            See more+
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

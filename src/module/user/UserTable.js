@@ -43,7 +43,6 @@ const UserTable = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        // await deleteUser(userId);
         await deleteDoc(colRef);
         Swal.fire("Deleted!", "Your file has been deleted.", "success");
       }
@@ -72,7 +71,10 @@ const UserTable = () => {
                 <td>
                   <div className="flex items-center gap-x-3">
                     <img
-                      src={item.photoURL}
+                      src={
+                        item.photoURL ||
+                        "https://images.unsplash.com/photo-1680913856414-64943c9cfdec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzOXx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60"
+                      }
                       alt={item?.username}
                       className="w-10 h-10 object-cover rounded-md flex-shrink-0"
                     />
@@ -103,7 +105,7 @@ const UserTable = () => {
                     <LabelStatus type="admin">Admin</LabelStatus>
                   )}
                   {item.role === userRole.MOD && (
-                    <LabelStatus type="warning">Mod</LabelStatus>
+                    <LabelStatus type="warning">Moderator</LabelStatus>
                   )}
                   {item.role === userRole.USER && (
                     <LabelStatus type="user">User</LabelStatus>

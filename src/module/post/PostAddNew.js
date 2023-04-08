@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -33,9 +35,10 @@ const PostAddNew = () => {
       title: "",
       slug: "",
       status: 2,
-      categoryId: "",
       hot: false,
       image: "",
+      category: {},
+      user: {},
     },
   });
   const watchStatus = watch("status");
@@ -50,6 +53,25 @@ const PostAddNew = () => {
   const [categories, setCategories] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!userInfo.email) return;
+      const q = query(
+        collection(db, "users"),
+        where("email", "==", userInfo.email)
+      );
+      const querySnapshot = await getDocs(q);
+      console.log(querySnapshot.size);
+      querySnapshot.forEach((doc) => {
+        setValue("user", {
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+    }
+    fetchUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo.email]);
   const addPostHandler = async (values) => {
     setLoading(true);
     try {
@@ -60,16 +82,16 @@ const PostAddNew = () => {
       await addDoc(colRef, {
         ...cloneValues,
         image,
-        userId: userInfo.uid,
         createdAt: serverTimestamp(),
       });
       reset({
         title: "",
         slug: "",
         status: 2,
-        categoryId: "",
         hot: false,
         image: "",
+        category: {},
+        user: {},
       });
       handleResetUpload();
       setSelectCategory({});
@@ -102,8 +124,13 @@ const PostAddNew = () => {
     document.title = "Monkey Blogging - Add new post";
   }, []);
 
-  const handleClickOption = (item) => {
-    setValue("categoryId", item.id);
+  const handleClickOption = async (item) => {
+    const colRef = doc(db, "categories", item.id);
+    const docData = await getDoc(colRef);
+    setValue("category", {
+      id: docData.id,
+      ...docData.data(),
+    });
     setSelectCategory(item);
   };
 

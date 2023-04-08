@@ -43,16 +43,14 @@ const SignUpPage = () => {
     await createUserWithEmailAndPassword(auth, values.email, values.password);
     await updateProfile(auth.currentUser, {
       displayName: values.fullname,
-      photoURL:
-        "https://images.unsplash.com/photo-1679847855144-7f87b55070c6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+      photoURL: "",
     });
     await setDoc(doc(db, "users", auth.currentUser.uid), {
       fullname: values.fullname,
       email: values.email,
       password: values.password,
       username: slugify(values.fullname, { lower: true }),
-      photoURL:
-        "https://images.unsplash.com/photo-1679847855144-7f87b55070c6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80",
+      photoURL: "",
       status: userStatus.ACTIVE,
       role: userRole.USER,
       createdAt: serverTimestamp(),
