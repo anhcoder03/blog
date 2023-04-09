@@ -9,9 +9,8 @@ const PostItemStyles = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 380px;
   .post {
     &-image {
       height: 202px;

@@ -73,6 +73,7 @@ export default function useFirebaseImage(
         cb && cb();
       })
       .catch((error) => {
+        console.log("handleDeleteImage ~ error", error);
         console.log("Can not delete image");
       });
   };

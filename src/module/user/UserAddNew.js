@@ -15,7 +15,6 @@ import { auth, db } from "../../firebase/config";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import slugify from "slugify";
 import { toast } from "react-toastify";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const UserAddNew = () => {
   const {
@@ -39,13 +38,14 @@ const UserAddNew = () => {
       createdAt: new Date(),
     },
   });
+  const image_name = getValues("image_name");
   const {
     image,
     handleResetUpload,
     progress,
     handleSelectImage,
     handleDeleteImage,
-  } = useFirebaseImage(setValue, getValues);
+  } = useFirebaseImage(setValue, getValues, image_name);
 
   const handleCreateUser = async (values) => {
     console.log(values);

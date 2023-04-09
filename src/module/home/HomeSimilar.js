@@ -6,7 +6,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useEffect } from "react";
 import { useState } from "react";
-import { Navigation, Pagination } from "swiper";
+import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";

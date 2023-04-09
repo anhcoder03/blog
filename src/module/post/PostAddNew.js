@@ -51,9 +51,9 @@ const PostAddNew = () => {
     },
   });
   const watchHot = watch("hot");
+  const image_name = getValues("image_name");
   const { image, progress, handleSelectImage, handleDeleteImage } =
-    useFirebaseImage(setValue, getValues);
-
+    useFirebaseImage(setValue, getValues, image_name);
   const [categories, setCategories] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
@@ -77,6 +77,7 @@ const PostAddNew = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo.email]);
   const addPostHandler = async (values) => {
+    console.log(values);
     setLoading(true);
     try {
       const cloneValues = { ...values };
@@ -208,13 +209,6 @@ const PostAddNew = () => {
           </Field>
           <div className="flex flex-col">
             <Field>
-              <Label>Feature post</Label>
-              <Toggle
-                on={watchHot === true}
-                onClick={() => setValue("hot", !watchHot)}
-              ></Toggle>
-            </Field>
-            <Field>
               <Label>Category</Label>
               <Dropdown>
                 <Dropdown.Select placeholder="Select the category"></Dropdown.Select>
@@ -235,6 +229,13 @@ const PostAddNew = () => {
                   {selectCategory?.name}
                 </span>
               )}
+            </Field>
+            <Field>
+              <Label>Feature post</Label>
+              <Toggle
+                on={watchHot === true}
+                onClick={() => setValue("hot", !watchHot)}
+              ></Toggle>
             </Field>
           </div>
         </div>

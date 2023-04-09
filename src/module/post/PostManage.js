@@ -162,7 +162,10 @@ const PostManage = () => {
                       className="w-[66px] h-[55px] rounded object-cover"
                     />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-sm max-w-[300px]">
+                      <h3
+                        title={item.title}
+                        className="font-semibold truncate text-sm max-w-[300px]"
+                      >
                         {item.title}
                       </h3>
                       <time className="text-sm text-gray-500">
