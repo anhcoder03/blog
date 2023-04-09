@@ -30,11 +30,11 @@ const PostNewestLargeStyles = styled.div`
 const PostNewestLarge = ({ data }) => {
   return (
     <PostNewestLargeStyles>
-      <PostImage url={data.image} alt=""></PostImage>
+      <PostImage to={`/${data?.slug}`} url={data.image} alt=""></PostImage>
       <PostCategory className="post-category">
         {data?.category?.name}
       </PostCategory>
-      <PostTitle size="big" className="post-title">
+      <PostTitle size="big" className="post-title" to={`/${data?.slug}`}>
         {data?.title}
       </PostTitle>
       <PostMeta

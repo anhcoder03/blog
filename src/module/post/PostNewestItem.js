@@ -49,12 +49,14 @@ const PostNewestItemStyles = styled.div`
 const PostNewestItem = ({ data }) => {
   return (
     <PostNewestItemStyles>
-      <PostImage url={data?.image} alt="" to="/"></PostImage>
+      <PostImage url={data?.image} alt="" to={`/${data?.slug}`}></PostImage>
       <div className="post-content">
         <PostCategory className="post-category" type="secondary">
           {data?.category?.name}
         </PostCategory>
-        <PostTitle className="post-title">{data?.title}</PostTitle>
+        <PostTitle to={`/${data?.slug}`} className="post-title">
+          {data?.title}
+        </PostTitle>
         <PostMeta
           date={formatDate(data?.createdAt?.seconds)}
           authorName={data?.user?.fullname}
