@@ -10,8 +10,11 @@ import formatDate from "../../utils/formatDate";
 import { userRole, userStatus } from "../../utils/constants";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/auth-context";
+import { toast } from "react-toastify";
 
 const UserTable = () => {
+  const { userInfo } = useAuth();
   const [userList, setUserList] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
@@ -32,6 +35,14 @@ const UserTable = () => {
   }, []);
 
   const handleDeleteCategory = async (userId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
+    if (userId === "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Admin không thể xoá chính mình!");
+      return;
+    }
     const colRef = doc(db, "users", userId);
     Swal.fire({
       title: "Are you sure?",
@@ -48,6 +59,14 @@ const UserTable = () => {
       }
     });
   };
+  const handleNavigateUpdate = (userId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
+    navigate(`/manage/update-user?id=${userId}`);
+  };
+
   return (
     <div>
       <Table>
@@ -115,9 +134,7 @@ const UserTable = () => {
                   <div className="flex gap-5 text-gray-400">
                     <ActionView></ActionView>
                     <ActionEdit
-                      onClick={() =>
-                        navigate(`/manage/update-user?id=${item.id}`)
-                      }
+                      onClick={() => handleNavigateUpdate(item.id)}
                     ></ActionEdit>
                     <ActionDelete
                       onClick={() => handleDeleteCategory(item.id)}

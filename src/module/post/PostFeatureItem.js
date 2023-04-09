@@ -74,7 +74,7 @@ const PostFeatureItem = ({ data }) => {
             date={formatDate}
           ></PostMeta>
         </div>
-        <PostTitle size="big" to={data.title}>
+        <PostTitle size="big" to={data.slug}>
           {data.title}
         </PostTitle>
       </div>

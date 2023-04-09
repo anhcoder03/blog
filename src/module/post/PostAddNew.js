@@ -26,9 +26,14 @@ import { Radio } from "../../components/checkbox";
 import { postStatus } from "../../utils/constants";
 import { Button } from "../../components/button";
 import DashboardHeading from "../dashboard/DashboardHeading";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
 
 const PostAddNew = () => {
   const { userInfo } = useAuth();
+  const [content, setContent] = useState("");
+  const navigate = useNavigate();
   const { control, watch, setValue, handleSubmit, getValues, reset } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -39,6 +44,7 @@ const PostAddNew = () => {
       image: "",
       category: {},
       user: {},
+      content: "",
     },
   });
   const watchStatus = watch("status");
@@ -82,6 +88,7 @@ const PostAddNew = () => {
       await addDoc(colRef, {
         ...cloneValues,
         image,
+        content,
         createdAt: serverTimestamp(),
       });
       reset({
@@ -92,10 +99,12 @@ const PostAddNew = () => {
         image: "",
         category: {},
         user: {},
+        content: "",
       });
       handleResetUpload();
       setSelectCategory({});
       toast.success("Create new post successfully!");
+      navigate("/manage/posts");
     } catch (error) {
       setLoading(false);
     } finally {
@@ -227,6 +236,14 @@ const PostAddNew = () => {
                 Reject
               </Radio>
             </FieldCheckboxes>
+          </Field>
+        </div>
+        <div className="mb-10">
+          <Field>
+            <Label>Content</Label>
+            <div className="w-full entry-content">
+              <ReactQuill theme="snow" value={content} onChange={setContent} />
+            </div>
           </Field>
         </div>
         <Button

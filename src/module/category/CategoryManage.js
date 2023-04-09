@@ -21,8 +21,11 @@ import { PER_PAGE, categoryStatus } from "../../utils/constants";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { debounce } from "lodash";
+import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/auth-context";
 
 const CategoryManage = () => {
+  const { userInfo } = useAuth();
   const [categoryList, setCategoryList] = useState([]);
   const navigate = useNavigate();
   const [filter, setFilter] = useState("");
@@ -82,6 +85,10 @@ const CategoryManage = () => {
     fetchData();
   }, [filter]);
   const handleDeleteCategory = async (docId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
     const colRef = doc(db, "categories", docId);
     Swal.fire({
       title: "Are you sure?",

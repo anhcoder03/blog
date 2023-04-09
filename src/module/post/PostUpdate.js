@@ -26,6 +26,8 @@ import useFirebaseImage from "../../hooks/useFirebaseImage";
 import { useState } from "react";
 import slugify from "slugify";
 import { toast } from "react-toastify";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const PostUpdate = () => {
   const [params] = useSearchParams();
@@ -33,6 +35,7 @@ const PostUpdate = () => {
   const [categories, setCategories] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const navigate = useNavigate();
+  const [content, setContent] = useState("");
   const {
     control,
     handleSubmit,
@@ -63,6 +66,7 @@ const PostUpdate = () => {
       reset(single.data());
       setImage(single.data().image);
       setSelectCategory(single.data().category);
+      setContent(single.data().content);
     }
     fetchData();
   }, [postId, reset, setImage]);
@@ -94,6 +98,7 @@ const PostUpdate = () => {
         slug: slugify(values.slug || values.title, { lower: true }),
         status: Number(values.status),
         image,
+        content,
       });
       toast.success("Update post successfully!");
       navigate("/manage/posts");
@@ -210,6 +215,14 @@ const PostUpdate = () => {
                 Reject
               </Radio>
             </FieldCheckboxes>
+          </Field>
+        </div>
+        <div className="mb-10">
+          <Field>
+            <Label>Content</Label>
+            <div className="w-full entry-content">
+              <ReactQuill theme="snow" value={content} onChange={setContent} />
+            </div>
           </Field>
         </div>
         <Button
