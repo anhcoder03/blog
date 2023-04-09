@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Field } from "../../components/field";
@@ -15,8 +15,23 @@ import { auth, db } from "../../firebase/config";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import slugify from "slugify";
 import { toast } from "react-toastify";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const UserAddNew = () => {
+  const schema = yup.object({
+    fullname: yup.string().required("Bạn cần nhập fullname"),
+    email: yup
+      .string()
+      .email("Email không đúng định dạng")
+      .required("Bạn cần nhập email"),
+    password: yup
+      .string()
+      .min(8, "password quá ngắn")
+      .max(16, "password quá dài"),
+    role: yup.number().required("Bạn cần chọn quyền của user"),
+    status: yup.number().required("Bạn cần chọn trạng thái của user"),
+  });
   const {
     control,
     handleSubmit,
@@ -24,7 +39,7 @@ const UserAddNew = () => {
     setValue,
     getValues,
     reset,
-    formState: { isValid, isSubmitting },
+    formState: { isValid, isSubmitting, errors },
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -37,6 +52,7 @@ const UserAddNew = () => {
       role: userRole.USER,
       createdAt: new Date(),
     },
+    resolver: yupResolver(schema),
   });
   const image_name = getValues("image_name");
   const {
@@ -48,7 +64,10 @@ const UserAddNew = () => {
   } = useFirebaseImage(setValue, getValues, image_name);
 
   const handleCreateUser = async (values) => {
-    console.log(values);
+    if (!image) {
+      toast.error("Vui lòng chọn ảnh!");
+      return;
+    }
     if (!isValid) return;
     try {
       await createUserWithEmailAndPassword(auth, values.email, values.password);
@@ -77,10 +96,17 @@ const UserAddNew = () => {
       toast.success("Create user successfully");
       handleResetUpload();
     } catch (error) {
-      toast.error("Can not create user!");
+      toast.error("Email đã tồn tại! vui lòng chọn email khác!");
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   const watchStatus = watch("status");
   const watchRole = watch("role");
 
@@ -126,7 +152,7 @@ const UserAddNew = () => {
               name="email"
               placeholder="Enter your email"
               control={control}
-              type="email"
+              type="text"
             ></Input>
           </Field>
           <Field>

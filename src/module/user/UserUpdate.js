@@ -15,9 +15,24 @@ import ImageUpload from "../../components/image/ImageUpload";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import slugify from "slugify";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { toast } from "react-toastify";
 
 const UserUpdate = () => {
+  const schema = yup.object({
+    fullname: yup.string().required("Bạn cần nhập fullname"),
+    email: yup
+      .string()
+      .email("Email không đúng định dạng")
+      .required("Bạn cần nhập email"),
+    password: yup
+      .string()
+      .min(8, "password quá ngắn")
+      .max(16, "password quá dài"),
+    role: yup.number().required("Bạn cần chọn quyền của user"),
+    status: yup.number().required("Bạn cần chọn trạng thái của user"),
+  });
   const [params] = useSearchParams();
   const userId = params.get("id");
   const navigate = useNavigate();
@@ -28,10 +43,11 @@ const UserUpdate = () => {
     reset,
     setValue,
     getValues,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors, isValid },
   } = useForm({
     mode: "onChange",
     defaultValues: {},
+    resolver: yupResolver(schema),
   });
 
   const imageUrl = getValues("photoURL");
@@ -55,6 +71,11 @@ const UserUpdate = () => {
     fetchData();
   }, [userId, reset, setImage]);
   const handleUpdateUser = async (values) => {
+    if (!image) {
+      toast.error("Vui lòng chọn ảnh!");
+      return;
+    }
+    if (!isValid) return;
     try {
       const colRef = doc(db, "users", userId);
       await updateDoc(colRef, {
@@ -68,12 +89,19 @@ const UserUpdate = () => {
       toast.success("Update user successfully!");
       navigate("/manage/user");
     } catch (error) {
-      toast.error("Can not update user!");
+      toast.error("Email đã tồn tại! vui lòng chọn email khác!");
+      console.log(error);
     }
   };
   const watchStatus = watch("status");
   const watchRole = watch("role");
 
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   if (!userId) return null;
   return (
     <div>
@@ -117,7 +145,7 @@ const UserUpdate = () => {
               name="email"
               placeholder="Enter your email"
               control={control}
-              type="email"
+              type="text"
             ></Input>
           </Field>
           <Field>

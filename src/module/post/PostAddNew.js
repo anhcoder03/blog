@@ -30,13 +30,27 @@ import { imgbbAPI } from "../../config/apiConfig";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useMemo } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 Quill.register("modules/imageUploader", ImageUploader);
 const PostAddNew = () => {
+  const schema = yup.object({
+    title: yup.string().required("Bạn phải nhập tiêu đề"),
+    category: yup.object().required("Bạn phải chọn Category"),
+  });
   const { userInfo } = useAuth();
   const [content, setContent] = useState("");
   const navigate = useNavigate();
-  const { control, watch, setValue, handleSubmit, getValues, reset } = useForm({
+  const {
+    control,
+    watch,
+    setValue,
+    handleSubmit,
+    getValues,
+    reset,
+    formState: { isValid, errors },
+  } = useForm({
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -49,6 +63,7 @@ const PostAddNew = () => {
       content: "",
       categoryId: "",
     },
+    resolver: yupResolver(schema),
   });
   const watchHot = watch("hot");
   const image_name = getValues("image_name");
@@ -77,7 +92,19 @@ const PostAddNew = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo.email]);
   const addPostHandler = async (values) => {
-    console.log(values);
+    if (!image) {
+      toast.error("Vui lòng chọn ảnh!");
+      return;
+    }
+    if (!selectCategory) {
+      toast.error("Vui lòng chọn danh mục!");
+      return;
+    }
+    if (!content) {
+      toast.error("Vui lòng nhập nội dung bài viết!");
+      return;
+    }
+    if (!isValid) return;
     setLoading(true);
     try {
       const cloneValues = { ...values };
@@ -172,7 +199,12 @@ const PostAddNew = () => {
     setValue("categoryId", docData.id);
     setSelectCategory(item);
   };
-
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   return (
     <>
       <DashboardHeading title="Add post" desc="Add new post"></DashboardHeading>
@@ -184,7 +216,6 @@ const PostAddNew = () => {
               control={control}
               placeholder="Enter your title"
               name="title"
-              required
             ></Input>
           </Field>
           <Field>
@@ -210,7 +241,7 @@ const PostAddNew = () => {
           <div className="flex flex-col">
             <Field>
               <Label>Category</Label>
-              <Dropdown>
+              <Dropdown name="category">
                 <Dropdown.Select placeholder="Select the category"></Dropdown.Select>
                 <Dropdown.List>
                   {categories.length > 0 &&

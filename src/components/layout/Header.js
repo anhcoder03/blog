@@ -65,14 +65,18 @@ const HeaderStyles = styled.header`
     right: 25px;
   }
   @media screen and (max-width: 1023.98px) {
+    .header-main {
+      justify-content: space-between;
+    }
     .logo {
       max-width: 30px;
     }
     .menu,
-    .search,
-    .header-button,
-    .header-auth {
+    .search {
       display: none;
+    }
+    .header-button {
+      height: 40px;
     }
   }
 `;

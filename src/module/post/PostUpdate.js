@@ -31,10 +31,16 @@ import "react-quill/dist/quill.snow.css";
 import ImageUploader from "quill-image-uploader";
 import { imgbbAPI } from "../../config/apiConfig";
 import axios from "axios";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 Quill.register("modules/imageUploader", ImageUploader);
 
 const PostUpdate = () => {
+  const schema = yup.object({
+    title: yup.string().required("Bạn phải nhập tiêu đề"),
+    category: yup.object().required("Bạn phải chọn Category"),
+  });
   const [params] = useSearchParams();
   const postId = params.get("id");
   const [categories, setCategories] = useState([]);
@@ -48,10 +54,11 @@ const PostUpdate = () => {
     reset,
     setValue,
     getValues,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting, isValid, errors },
   } = useForm({
     mode: "onChange",
     defaultValues: {},
+    resolver: yupResolver(schema),
   });
   const imageUrl = getValues("image");
   const imageRegex = /%2F(\S+)\?/gm.exec(imageUrl);
@@ -94,6 +101,18 @@ const PostUpdate = () => {
   }, []);
 
   const handleUpdatePost = async (values) => {
+    if (!image) {
+      toast.error("Vui lòng chọn ảnh!");
+      return;
+    }
+    if (!selectCategory) {
+      toast.error("Vui lòng chọn danh mục!");
+      return;
+    }
+    if (!content) {
+      toast.error("Vui lòng nhập nội dung bài viết!");
+      return;
+    }
     if (!isValid) return;
     try {
       const colRef = doc(db, "posts", postId);
@@ -150,7 +169,12 @@ const PostUpdate = () => {
     setValue("categoryId", docData.id);
     setSelectCategory(item);
   };
-
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   const watchStatus = watch("status");
   const watchHot = watch("hot");
   return (
@@ -167,7 +191,6 @@ const PostUpdate = () => {
               control={control}
               placeholder="Enter your title"
               name="title"
-              required
             ></Input>
           </Field>
           <Field>

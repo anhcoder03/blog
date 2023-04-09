@@ -14,8 +14,16 @@ import { Button } from "../../components/button";
 import { useForm } from "react-hook-form";
 import slugify from "slugify";
 import { toast } from "react-toastify";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const CategoryUpdate = () => {
+  const schema = yup.object({
+    name: yup
+      .string()
+      .max(16, "Name quá dài")
+      .required("Vui lòng nhập tên category"),
+  });
   const [params] = useSearchParams();
   const categoryId = params.get("id");
   const navigate = useNavigate();
@@ -24,10 +32,11 @@ const CategoryUpdate = () => {
     handleSubmit,
     watch,
     reset,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors, isValid },
   } = useForm({
     mode: "onChange",
     defaultValues: {},
+    resolver: yupResolver(schema),
   });
   useEffect(() => {
     async function fetchData() {
@@ -39,6 +48,7 @@ const CategoryUpdate = () => {
     fetchData();
   }, [categoryId, reset]);
   const handleUpdateCategory = async (values) => {
+    if (!isValid) return;
     const colRef = doc(db, "categories", categoryId);
     await updateDoc(colRef, {
       name: values.name,
@@ -49,6 +59,12 @@ const CategoryUpdate = () => {
     navigate("/manage/category");
   };
   const watchStatus = watch("status");
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   if (!categoryId) return null;
   return (
     <div>
@@ -68,7 +84,6 @@ const CategoryUpdate = () => {
               control={control}
               name="name"
               placeholder="Enter your category name"
-              required
             ></Input>
           </Field>
           <Field>

@@ -22,6 +22,14 @@ const DashboardStyles = styled.div`
       align-items: start;
     }
   }
+  @media screen and (max-width: 1023.98px) {
+    width: 100%;
+    .dashboard {
+      &-main {
+        display: block;
+      }
+    }
+  }
 `;
 const DashboardLayout = ({ children }) => {
   const { userInfo } = useAuth();

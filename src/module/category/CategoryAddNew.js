@@ -12,14 +12,23 @@ import { Radio } from "../../components/checkbox";
 import { Button } from "../../components/button";
 import { categoryStatus } from "../../utils/constants";
 import DashboardHeading from "../dashboard/DashboardHeading";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useEffect } from "react";
 
 const CategoryAddNew = () => {
+  const schema = yup.object({
+    name: yup
+      .string()
+      .max(16, "Name quá dài")
+      .required("Vui lòng nhập tên category"),
+  });
   const {
     control,
     handleSubmit,
     watch,
     reset,
-    formState: { isValid, isSubmitting },
+    formState: { isValid, isSubmitting, errors },
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -28,6 +37,7 @@ const CategoryAddNew = () => {
       status: 1,
       createdAt: new Date(),
     },
+    resolver: yupResolver(schema),
   });
   const handleAddNewCategory = async (values) => {
     if (!isValid) return;
@@ -54,6 +64,12 @@ const CategoryAddNew = () => {
       });
     }
   };
+  useEffect(() => {
+    const arrayError = Object.values(errors);
+    if (arrayError.length > 0) {
+      toast.error(arrayError[0]?.message);
+    }
+  }, [errors]);
   const watchStatus = watch("status");
   return (
     <div>
@@ -73,7 +89,6 @@ const CategoryAddNew = () => {
               control={control}
               name="name"
               placeholder="Enter your category name"
-              required
             ></Input>
           </Field>
           <Field>
