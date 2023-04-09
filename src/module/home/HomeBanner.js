@@ -66,8 +66,12 @@ const HomeBanner = () => {
               Quaerat voluptates possimus dolorem officiis pariatur, repellat,
               cupiditate porro, quidem molestiae impedit laudantium neque quo!
             </p>
-            <Button to="/sign-up" kind="secondary" className="banner-button">
-              Get started
+            <Button
+              to="/manage/add-post"
+              kind="secondary"
+              className="banner-button"
+            >
+              Tạo bài viết
             </Button>
           </div>
           <div className="banner-image">

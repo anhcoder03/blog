@@ -5,6 +5,7 @@ import DashboardHeader from "./DashboardHeader";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../contexts/auth-context";
 import SignInPage from "../../pages/SignInPage";
+import { toast } from "react-toastify";
 const DashboardStyles = styled.div`
   max-width: 1600px;
   margin: 0 auto;
@@ -33,7 +34,10 @@ const DashboardStyles = styled.div`
 `;
 const DashboardLayout = ({ children }) => {
   const { userInfo } = useAuth();
-  if (!userInfo) return <SignInPage></SignInPage>;
+  if (!userInfo) {
+    toast.warning("Bạn cần đăng nhập để sử dụng tính năng này!");
+    return <SignInPage></SignInPage>;
+  }
   return (
     <DashboardStyles>
       <DashboardHeader></DashboardHeader>
