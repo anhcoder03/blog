@@ -7,7 +7,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { db } from "../../firebase/config";
 import { useForm } from "react-hook-form";
@@ -26,8 +26,13 @@ import useFirebaseImage from "../../hooks/useFirebaseImage";
 import { useState } from "react";
 import slugify from "slugify";
 import { toast } from "react-toastify";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import ImageUploader from "quill-image-uploader";
+import { imgbbAPI } from "../../config/apiConfig";
+import axios from "axios";
+
+Quill.register("modules/imageUploader", ImageUploader);
 
 const PostUpdate = () => {
   const [params] = useSearchParams();
@@ -106,6 +111,34 @@ const PostUpdate = () => {
       toast.error("Can not update user!");
     }
   };
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }], // custom button values
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["link", "image"],
+      ],
+      imageUploader: {
+        upload: async (file) => {
+          const bodyFormData = new FormData();
+          bodyFormData.append("image", file);
+          const response = await axios({
+            method: "post",
+            url: imgbbAPI,
+            data: bodyFormData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          return response.data.data.url;
+        },
+      },
+    }),
+    []
+  );
 
   const handleClickOption = async (item) => {
     const colRef = doc(db, "categories", item.id);
@@ -221,7 +254,12 @@ const PostUpdate = () => {
           <Field>
             <Label>Content</Label>
             <div className="w-full entry-content">
-              <ReactQuill theme="snow" value={content} onChange={setContent} />
+              <ReactQuill
+                modules={modules}
+                theme="snow"
+                value={content}
+                onChange={setContent}
+              />
             </div>
           </Field>
         </div>
