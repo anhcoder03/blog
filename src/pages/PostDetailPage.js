@@ -4,8 +4,6 @@ import Layout from "../components/layout/Layout";
 import PostImage from "../module/post/PostImage";
 import PostCategory from "../module/post/PostCategory";
 import PostMeta from "../module/post/PostMeta";
-import PostItem from "../module/post/PostItem";
-import Heading from "../components/layout/Heading";
 import { useLocation, useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 import parse from "html-react-parser";
@@ -13,6 +11,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useState } from "react";
 import formatDate from "../utils/formatDate";
+import PostRelated from "../module/post/PostRelated";
 const PostDetailsPageStyles = styled.div`
   padding-bottom: 100px;
   .post {
@@ -107,7 +106,11 @@ const PostDetailsPage = () => {
   useEffect(() => {
     async function fetchData() {
       if (!slug) return;
-      const colRef = query(collection(db, "posts"), where("slug", "==", slug));
+      const colRef = query(
+        collection(db, "posts"),
+        where("slug", "==", slug),
+        where("status", "==", 1)
+      );
       onSnapshot(colRef, (snapshot) => {
         snapshot.forEach((doc) => {
           doc.data() &&
@@ -125,7 +128,7 @@ const PostDetailsPage = () => {
       window.scrollTo(0, 0);
     }
   }, [location]);
-  if (!slug) return <NotFoundPage></NotFoundPage>;
+  if (!slug || !postInfo.title) return <NotFoundPage></NotFoundPage>;
   return (
     <PostDetailsPageStyles>
       <Layout>
@@ -171,15 +174,7 @@ const PostDetailsPage = () => {
               </div>
             </div>
           </div>
-          <div className="post-related">
-            <Heading>Bài viết liên quan</Heading>
-            <div className="grid-layout grid-layout--primary">
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-            </div>
-          </div>
+          <PostRelated categoryId={postInfo?.category?.id}></PostRelated>
         </div>
       </Layout>
     </PostDetailsPageStyles>

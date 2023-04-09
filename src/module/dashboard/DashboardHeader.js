@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Button } from "../../components/button";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../contexts/auth-context";
-import { useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase/config";
 const DashboardHeaderStyles = styled.div`
   background-color: white;
   padding: 20px;
@@ -42,18 +39,6 @@ const DashboardHeaderStyles = styled.div`
 
 const DashboardHeader = () => {
   const { userInfo } = useAuth();
-  const userId = userInfo?.uid;
-  const [avatar, setAvatar] = useState("");
-  useEffect(() => {
-    if (!userId) return;
-    async function fetchData() {
-      const colRef = doc(db, "users", userId);
-      const single = await getDoc(colRef);
-      console.log(single.data());
-      setAvatar(single.data().photoURL);
-    }
-    fetchData();
-  }, [userId]);
   return (
     <DashboardHeaderStyles>
       <NavLink to="/" className="logo">
@@ -71,7 +56,7 @@ const DashboardHeader = () => {
         <NavLink to="/profile" className="header-avatar">
           <img
             src={
-              avatar ||
+              userInfo?.photoURL ||
               "https://plus.unsplash.com/premium_photo-1674823157877-4d18f93192b8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80"
             }
             alt=""

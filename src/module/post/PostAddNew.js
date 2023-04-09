@@ -21,15 +21,17 @@ import { Input } from "../../components/input";
 import ImageUpload from "../../components/image/ImageUpload";
 import { Dropdown } from "../../components/dropdown";
 import Toggle from "../../components/toggle/Toggle";
-import FieldCheckboxes from "../../drafts/FieldCheckboxes";
-import { Radio } from "../../components/checkbox";
-import { postStatus } from "../../utils/constants";
 import { Button } from "../../components/button";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import ImageUploader from "quill-image-uploader";
+import { imgbbAPI } from "../../config/apiConfig";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useMemo } from "react";
 
+Quill.register("modules/imageUploader", ImageUploader);
 const PostAddNew = () => {
   const { userInfo } = useAuth();
   const [content, setContent] = useState("");
@@ -45,17 +47,13 @@ const PostAddNew = () => {
       category: {},
       user: {},
       content: "",
+      categoryId: "",
     },
   });
-  const watchStatus = watch("status");
   const watchHot = watch("hot");
-  const {
-    image,
-    handleResetUpload,
-    progress,
-    handleSelectImage,
-    handleDeleteImage,
-  } = useFirebaseImage(setValue, getValues);
+  const { image, progress, handleSelectImage, handleDeleteImage } =
+    useFirebaseImage(setValue, getValues);
+
   const [categories, setCategories] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,6 +86,7 @@ const PostAddNew = () => {
       await addDoc(colRef, {
         ...cloneValues,
         image,
+        status: 2,
         content,
         createdAt: serverTimestamp(),
       });
@@ -100,8 +99,8 @@ const PostAddNew = () => {
         category: {},
         user: {},
         content: "",
+        categoryId: "",
       });
-      handleResetUpload();
       setSelectCategory({});
       toast.success("Create new post successfully!");
       navigate("/manage/posts");
@@ -133,6 +132,35 @@ const PostAddNew = () => {
     document.title = "Monkey Blogging - Add new post";
   }, []);
 
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }], // custom button values
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["link", "image"],
+      ],
+      imageUploader: {
+        upload: async (file) => {
+          const bodyFormData = new FormData();
+          bodyFormData.append("image", file);
+          const response = await axios({
+            method: "post",
+            url: imgbbAPI,
+            data: bodyFormData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          return response.data.data.url;
+        },
+      },
+    }),
+    []
+  );
+
   const handleClickOption = async (item) => {
     const colRef = doc(db, "categories", item.id);
     const docData = await getDoc(colRef);
@@ -140,13 +168,14 @@ const PostAddNew = () => {
       id: docData.id,
       ...docData.data(),
     });
+    setValue("categoryId", docData.id);
     setSelectCategory(item);
   };
 
   return (
     <>
       <DashboardHeading title="Add post" desc="Add new post"></DashboardHeading>
-      <form onSubmit={handleSubmit(addPostHandler)}>
+      <form onSubmit={handleSubmit(addPostHandler)} className="mt-10">
         <div className="form-layout">
           <Field>
             <Label>Title</Label>
@@ -177,72 +206,48 @@ const PostAddNew = () => {
               image={image}
             ></ImageUpload>
           </Field>
-          <Field>
-            <Label>Category</Label>
-            <Dropdown>
-              <Dropdown.Select placeholder="Select the category"></Dropdown.Select>
-              <Dropdown.List>
-                {categories.length > 0 &&
-                  categories.map((item) => (
-                    <Dropdown.Option
-                      key={item.id}
-                      onClick={() => handleClickOption(item)}
-                    >
-                      {item.name}
-                    </Dropdown.Option>
-                  ))}
-              </Dropdown.List>
-            </Dropdown>
-            {selectCategory?.name && (
-              <span className="inline-block p-3 rounded-lg bg-green-50 text-sm text-green-600 font-medium">
-                {selectCategory?.name}
-              </span>
-            )}
-          </Field>
-        </div>
-        <div className="form-layout">
-          <Field>
-            <Label>Feature post</Label>
-            <Toggle
-              on={watchHot === true}
-              onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
-          </Field>
-          <Field>
-            <Label>Status</Label>
-            <FieldCheckboxes>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postStatus.APPROVED}
-                value={postStatus.APPROVED}
-              >
-                Approved
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postStatus.PENDING}
-                value={postStatus.PENDING}
-              >
-                Pending
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postStatus.REJECTED}
-                value={postStatus.REJECTED}
-              >
-                Reject
-              </Radio>
-            </FieldCheckboxes>
-          </Field>
+          <div className="flex flex-col">
+            <Field>
+              <Label>Feature post</Label>
+              <Toggle
+                on={watchHot === true}
+                onClick={() => setValue("hot", !watchHot)}
+              ></Toggle>
+            </Field>
+            <Field>
+              <Label>Category</Label>
+              <Dropdown>
+                <Dropdown.Select placeholder="Select the category"></Dropdown.Select>
+                <Dropdown.List>
+                  {categories.length > 0 &&
+                    categories.map((item) => (
+                      <Dropdown.Option
+                        key={item.id}
+                        onClick={() => handleClickOption(item)}
+                      >
+                        {item.name}
+                      </Dropdown.Option>
+                    ))}
+                </Dropdown.List>
+              </Dropdown>
+              {selectCategory?.name && (
+                <span className="inline-block p-3 rounded-lg bg-green-50 text-sm text-green-600 font-medium">
+                  {selectCategory?.name}
+                </span>
+              )}
+            </Field>
+          </div>
         </div>
         <div className="mb-10">
           <Field>
             <Label>Content</Label>
             <div className="w-full entry-content">
-              <ReactQuill theme="snow" value={content} onChange={setContent} />
+              <ReactQuill
+                modules={modules}
+                theme="snow"
+                value={content}
+                onChange={setContent}
+              />
             </div>
           </Field>
         </div>

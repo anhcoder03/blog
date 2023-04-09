@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Table } from "../../components/table";
-import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
+import { ActionDelete, ActionEdit } from "../../components/action";
 import LabelStatus from "../../components/label/LabelStatus";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Button } from "../../components/button";
@@ -108,10 +108,29 @@ const CategoryManage = () => {
   const handleInputFilter = debounce((e) => {
     setFilter(e.target.value);
   }, 500);
+
+  const handleNavigateToUpdateCategory = (categoryId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
+    navigate(`/manage/update-category?id=${categoryId}`);
+  };
+  const handleNavigateToCreateCategory = () => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
+    navigate("/manage/add-category");
+  };
   return (
     <div>
       <DashboardHeading title="Categories" desc="Manage your category">
-        <Button kind="ghost" height="60px" to="/manage/add-category">
+        <Button
+          kind="ghost"
+          height="60px"
+          onClick={handleNavigateToCreateCategory}
+        >
           Create category
         </Button>
       </DashboardHeading>
@@ -152,11 +171,8 @@ const CategoryManage = () => {
                 </td>
                 <td>
                   <div className="flex gap-5 text-gray-400">
-                    <ActionView></ActionView>
                     <ActionEdit
-                      onClick={() =>
-                        navigate(`/manage/update-category?id=${item.id}`)
-                      }
+                      onClick={() => handleNavigateToUpdateCategory(item.id)}
                     ></ActionEdit>
                     <ActionDelete
                       onClick={() => handleDeleteCategory(item.id)}

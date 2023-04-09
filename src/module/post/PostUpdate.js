@@ -147,6 +147,7 @@ const PostUpdate = () => {
       id: docData.id,
       ...docData.data(),
     });
+    setValue("categoryId", docData.id);
     setSelectCategory(item);
   };
 

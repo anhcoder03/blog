@@ -4,6 +4,7 @@ import PostCategory from "./PostCategory";
 import PostTitle from "./PostTitle";
 import PostMeta from "./PostMeta";
 import PostImage from "./PostImage";
+import formatDate from "../../utils/formatDate";
 const PostNewestItemStyles = styled.div`
   display: flex;
   align-items: center;
@@ -45,22 +46,19 @@ const PostNewestItemStyles = styled.div`
     }
   }
 `;
-const PostNewestItem = () => {
+const PostNewestItem = ({ data }) => {
   return (
     <PostNewestItemStyles>
-      <PostImage
-        url="https://images.unsplash.com/photo-1510519138101-570d1dca3d66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2294&q=80"
-        alt=""
-        to="/"
-      ></PostImage>
+      <PostImage url={data?.image} alt="" to="/"></PostImage>
       <div className="post-content">
         <PostCategory className="post-category" type="secondary">
-          Kiến thức
+          {data?.category?.name}
         </PostCategory>
-        <PostTitle className="post-title">
-          Hướng dẫn setup phòng cực chill dành cho người mới toàn tập
-        </PostTitle>
-        <PostMeta></PostMeta>
+        <PostTitle className="post-title">{data?.title}</PostTitle>
+        <PostMeta
+          date={formatDate(data?.createdAt?.seconds)}
+          authorName={data?.user?.fullname}
+        ></PostMeta>
       </div>
     </PostNewestItemStyles>
   );

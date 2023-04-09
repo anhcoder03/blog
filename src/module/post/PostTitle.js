@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled, { css } from "styled-components";
 
 const PostTitleStyles = styled.h3`
@@ -29,7 +29,7 @@ const PostTitleStyles = styled.h3`
 const PostTitle = ({ children, className = "", size = "normal", to = "/" }) => {
   return (
     <PostTitleStyles size={size} className={className}>
-      <NavLink to={to}>{children}</NavLink>
+      <Link to={to}>{children}</Link>
     </PostTitleStyles>
   );
 };

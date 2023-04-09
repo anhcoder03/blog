@@ -17,6 +17,7 @@ import CategoryManage from "./module/category/CategoryManage";
 import CategoryUpdate from "./module/category/CategoryUpdate";
 import UserUpdate from "./module/user/UserUpdate";
 import PostUpdate from "./module/post/PostUpdate";
+import CategoryPage from "./pages/CategoryPage";
 
 function App() {
   return (
@@ -31,6 +32,10 @@ function App() {
           <Route
             path="/:slug"
             element={<PostDetailsPage></PostDetailsPage>}
+          ></Route>
+          <Route
+            path="/category/:slug"
+            element={<CategoryPage></CategoryPage>}
           ></Route>
           <Route element={<DashboardLayout></DashboardLayout>}>
             <Route

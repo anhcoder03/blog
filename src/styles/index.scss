@@ -76,3 +76,40 @@ a {
 .form-layout {
   @apply grid grid-cols-1 lg:grid-cols-2 lg:gap-x-10 mb-5 lg:mb-10;
 }
+
+.quill {
+  position: relative;
+  .ql-toolbar {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+  }
+}
+
+//slider similar
+.similar-post .swiper-button-next::after,
+.similar-post .swiper-button-prev::after {
+  font-size: 1rem;
+  color: white;
+}
+.similar-post .swiper-button-prev,
+.similar-post .swiper-button-next {
+  right: 0;
+  height: 40px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: lightblue;
+  opacity: 0;
+  transition: opacity 0.25s linear;
+}
+.similar-post .swiper-button-prev {
+  left: 0;
+}
+.similar-post:hover .swiper-button-next,
+.similar-post:hover .swiper-button-prev {
+  opacity: 1;
+}

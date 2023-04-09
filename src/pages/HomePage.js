@@ -4,6 +4,7 @@ import HomeBanner from "../module/home/HomeBanner";
 import Layout from "../components/layout/Layout";
 import HomeFeature from "../module/home/HomeFeature";
 import HomeNewest from "../module/home/HomeNewest";
+import HomeSimilar from "../module/home/HomeSimilar";
 
 const HomePageStyles = styled.div``;
 
@@ -14,6 +15,7 @@ const HomePage = () => {
         <HomeBanner></HomeBanner>
         <HomeFeature></HomeFeature>
         <HomeNewest></HomeNewest>
+        <HomeSimilar></HomeSimilar>
       </Layout>
     </HomePageStyles>
   );

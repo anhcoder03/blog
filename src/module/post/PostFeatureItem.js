@@ -66,7 +66,9 @@ const PostFeatureItem = ({ data }) => {
       <div className="post-content">
         <div className="post-top">
           {category?.name && (
-            <PostCategory to={category.slug}>{category.name}</PostCategory>
+            <PostCategory to={`/category/${category.slug}`}>
+              {category.name}
+            </PostCategory>
           )}
           <PostMeta
             to={slugify(user?.fullname || "", { lower: true })}

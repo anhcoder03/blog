@@ -45,7 +45,6 @@ const UserUpdate = () => {
       photoURL: "",
     });
   }
-  useEffect(() => {});
   useEffect(() => {
     async function fetchData() {
       const colRef = doc(db, "users", userId);

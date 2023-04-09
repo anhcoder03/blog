@@ -12,13 +12,7 @@ import useFirebaseImage from "../../hooks/useFirebaseImage";
 import { userRole, userStatus } from "../../utils/constants";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebase/config";
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import slugify from "slugify";
 import { toast } from "react-toastify";
 // import { createUserWithEmailAndPassword } from "firebase/auth";

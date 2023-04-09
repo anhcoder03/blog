@@ -1,9 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 import Heading from "../../components/layout/Heading";
-import PostItem from "../post/PostItem";
 import PostNewestLarge from "../post/PostNewestLarger";
 import PostNewestItem from "../post/PostNewestItem";
+import {
+  collection,
+  limit,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../../firebase/config";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const HomeNewestStyles = styled.div`
   .layout {
@@ -29,23 +38,39 @@ const HomeNewestStyles = styled.div`
 `;
 
 const HomeNewest = () => {
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    const colRef = collection(db, "posts");
+    const queries = query(
+      colRef,
+      where("status", "==", 1),
+      where("hot", "==", false),
+      limit(4)
+    );
+    onSnapshot(queries, (snapshot) => {
+      let results = [];
+      snapshot.forEach((doc) => {
+        results.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      setPosts(results);
+    });
+  }, []);
+  const [larger, ...rest] = posts;
+  if (posts.length <= 0) return null;
   return (
     <HomeNewestStyles className="home-block">
       <div className="container">
         <Heading>Mới nhất</Heading>
         <div className="layout">
-          <PostNewestLarge></PostNewestLarge>
+          <PostNewestLarge key={larger.id} data={larger}></PostNewestLarge>
           <div className="sidebar">
-            <PostNewestItem></PostNewestItem>
-            <PostNewestItem></PostNewestItem>
-            <PostNewestItem></PostNewestItem>
+            {rest.map((item) => (
+              <PostNewestItem data={item} key={item.id}></PostNewestItem>
+            ))}
           </div>
-        </div>
-        <div className="grid-layout grid-layout--primary">
-          <PostItem></PostItem>
-          <PostItem></PostItem>
-          <PostItem></PostItem>
-          <PostItem></PostItem>
         </div>
       </div>
     </HomeNewestStyles>

@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 const PostMetaStyles = styled.div`
@@ -34,9 +34,9 @@ const PostMeta = ({
     <PostMetaStyles className={className}>
       <span className="post-time">{date}</span>
       <span className="post-dot"></span>
-      <NavLink to={to}>
+      <Link to={to}>
         <span className="post-author">{authorName}</span>
-      </NavLink>
+      </Link>
     </PostMetaStyles>
   );
 };

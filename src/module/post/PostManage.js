@@ -23,8 +23,11 @@ import LabelStatus from "../../components/label/LabelStatus";
 import { debounce } from "lodash";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuth } from "../../contexts/auth-context";
 
 const PostManage = () => {
+  const { userInfo } = useAuth();
   const [postList, setPostList] = useState([]);
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
@@ -90,6 +93,10 @@ const PostManage = () => {
     setFilter(e.target.value);
   }, 500);
   const handleDeletePost = async (docId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
     const colRef = doc(db, "posts", docId);
     Swal.fire({
       title: "Are you sure?",
@@ -106,6 +113,14 @@ const PostManage = () => {
       }
     });
   };
+  const handleNavigateToUpdatePost = (postId) => {
+    if (userInfo.uid !== "VLbknqv6O2bGeTx1lIHAhwAZ3Aq2") {
+      toast.error("Bạn không có quyền thực hiện thao tác này!");
+      return;
+    }
+    navigate(`/manage/update-post?id=${postId}`);
+  };
+
   return (
     <div>
       <DashboardHeading
@@ -179,9 +194,7 @@ const PostManage = () => {
                       onClick={() => navigate(`/${item.slug}`)}
                     ></ActionView>
                     <ActionEdit
-                      onClick={() =>
-                        navigate(`/manage/update-post?id=${item.id}`)
-                      }
+                      onClick={() => handleNavigateToUpdatePost(item.id)}
                     ></ActionEdit>
                     <ActionDelete
                       onClick={() => handleDeletePost(item.id)}

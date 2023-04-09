@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { Table } from "../../components/table";
-import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
+import { ActionDelete, ActionEdit } from "../../components/action";
 import LabelStatus from "../../components/label/LabelStatus";
 import { useEffect } from "react";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
@@ -132,7 +132,6 @@ const UserTable = () => {
                 </td>
                 <td>
                   <div className="flex gap-5 text-gray-400">
-                    <ActionView></ActionView>
                     <ActionEdit
                       onClick={() => handleNavigateUpdate(item.id)}
                     ></ActionEdit>
